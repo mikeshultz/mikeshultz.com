@@ -10,7 +10,7 @@ Finally getting around to updating [my previous post](/setting-up-lets-encrypt-w
 
 **NOTE**: If you have a full Web cluster, load balancer, or your server is behind a firewall, please consider going the traditional route of purchasing a certificate.  It won't waste Let's Encrypt's resources, and you'll have a much easier time getting it setup.
 
-**NOTE**: If you're on a different distro than I am, some of the paths in these commands may be a little different.  *Run random commands from a Web site responsibly.*
+**NOTE**: If you're on a different distro than I am that uses different paths, or use a domain that *isn't* example.com, some of these commands may need to be altered.  *Run random commands from a Web site responsibly.*
 
 ## Install 
 
@@ -49,7 +49,7 @@ Create the Web root and make sure lighty has permissions to access these files. 
 
 #### Configure Lighttpd
 
-Now we need to configure lighty to serve these validation files on your new domain.  Edit `lighttpd.conf` or `vhosts.d/mysite.conf`, whichever you use and add the following: 
+Now we need to configure lighty to serve these validation files on your new domain.  Edit `lighttpd.conf` or `vhosts.d/mysite.conf`, whichever you use and add the following to your general config(single site host) or to the proper vhost section(multi-site host): 
 
     ## Used for letsencrypt validation
     $HTTP["url"] =~ "^/.well-known/" {
@@ -58,13 +58,14 @@ Now we need to configure lighty to serve these validation files on your new doma
         dir-listing.activate = "enable"
     }
 
-This will work for any future validation as well, but you may not want to leave it enabled after you are finished.  I'm assuming the ACME validation uses one time use tokens, but I haven't dug into the source to find out, so either do the research yourself or just disable it when we're done.  Now reload lighty to bring in the new conf.
+
+If you leave this config in place, this will work for any future validation as well.  `certbot` will delete any folders and files it creates, so there should be no major ramifications to leaving this in place.  Now reload lighty to bring in the new conf.
 
     systemctl restart lighttpd
 
 **OR** with lighttpd-angel
 
-    kill -HUP `cat /var/run/lighttpd.pid`
+    kill -HUP `cat /var/run/lighttpd-angel.pid`
 
 #### Run Certbot
 
@@ -75,7 +76,7 @@ Now you can run certbot to generate and fetch your new cert.
 
 It should go through the motions automagically and symlink all of your new certs in the `/etc/letsencrypt/live/example.com/` directory.
 
-## Reformat For Lighttpd<a name="reformat"></a>
+## Reformat Cert Files For Lighttpd<a name="reformat"></a>
 
 Lighty likes its certificates formatted in a specific way, so we're going to combine the private keys and certificate into one file that we'll tell lighty about later.
 
@@ -129,6 +130,6 @@ It's generally a good practice to use HTTPS always. There's no real downside to 
 
 ## Automate Renewal<a name="automate"></a>
 
-Assuming you left the lighty config for `.well-known`, you can just run the sane `certbot` command you used above as a daily cronjob.
+Assuming you left the lighty config for `.well-known`, you can just run the sane `certbot` command you used above as a daily cronjob.  
 
 Feel free to [yell at me](mailto:mike@mikeshultz.com) for any errors or omissions.
