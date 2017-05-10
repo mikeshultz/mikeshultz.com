@@ -6,6 +6,12 @@ Slug: setting-up-lets-encrypt-with-lighttpd
 Authors: Mike Shultz
 Summary: So earlier today(yesterday, now) Let's Encrypt was released as a public beta and thought I'd test it out on this site. The certs that it generates currently have a short expiration(4 months at the time of this writing) but since I'd never pay to encrypt this site but still like having encryption always available, thought I'd give it a shot.
 
+## DEPRECIATED
+
+[See my other post on using certbot](/setting-up-lets-encrypt-with-lighttpd-and-certbot.html).  The information here is old and probably doesn't work anymore.
+
+## Intro
+
 So earlier today(yesterday, now) [Let's Encrypt was released as a public beta](https://letsencrypt.org/2015/12/03/entering-public-beta.html) and thought I'd test it out on this site. The certs that it generates currently have a short expiration(4 months at the time of this writing) but since I'd never pay to encrypt this site but still like having encryption always available, thought I'd give it a shot.
 
 The auto-config stuff doesn't yet work for lighttpd so it requires some manual effort but overall, it's still pretty easy and you don't even have to mess with DNS. This was also build on a RHEL 7 system and destination paths may be different.
