@@ -4,11 +4,13 @@ Category: Security
 Tags: letsencrypt, linux, ssl, tls, lighttpd, certbot
 Slug: setting-up-lets-encrypt-with-lighttpd-and-certbot
 Authors: Mike Shultz
-Summary: Finally gotting around to updating my previous post on Let's Encrypt and lighttpd
+Summary: Finally getting around to updating my previous post on Let's Encrypt and lighttpd
 
-Finally gotting around to updating my previous post on [Let's Encrypt](https://letsencrypt.org) and lighttpd.  I'll assume you're generally familiar with both. 
+Finally getting around to updating [my previous post](/setting-up-lets-encrypt-with-lighttpd.html) on [Let's Encrypt](https://letsencrypt.org) and lighttpd.  I'll assume you're generally familiar with both. This time, however, we're going to use the much easier to use(and automate) [`certbot`](https://certbot.eff.org/), privided by the extraordinary [EFF](https://www.eff.org).
 
-**NOTE**: If you have a full Web cluster, load balancer, or something behind a firewall, please consider going the traditional route of getting a certificate.  It won't waste Let's Encrypt's resources, and you'll have a much easier time getting it setup.
+**NOTE**: If you have a full Web cluster, load balancer, or your server is behind a firewall, please consider going the traditional route of purchasing a certificate.  It won't waste Let's Encrypt's resources, and you'll have a much easier time getting it setup.
+
+**NOTE**: If you're on a different distro than I am, some of the paths in these commands may be a little different.  *Run random commands from a Web site responsibly.*
 
 ## Install 
 
@@ -16,11 +18,11 @@ Folow the [EFF docs to get certbot installed for your distro](https://certbot.ef
 
 ## Generate The Certificate
 
-Choose one of the following options only.  The first one is the easy way, but will require you to take down lighty.  The second one is a more high-availability way of doing things.
+Choose one of the following options only.  [Option A](#easyway) is the easy way, but will require you to take down lighty and can not be automated.  [Option B](#hardway) can be automated and is a more high-availability way of doing things.
 
-### The Easy Way<a name="easyway"></a>
+### (Option A) The Easy Way<a name="easyway"></a>
 
-**NOTE**: If you don't want to take down lighty during this process, see the section [The Hard Way](#hardway).
+**NOTE**: If you **do not** want to take down lighty during this process, see the section [The Hard Way](#hardway).
 
 First off, shut down lighty.  We want to get `certbot` up and running on standard Web ports, so we can't have anything conflicting there.  The following command may be different for your distro.
 
@@ -36,13 +38,14 @@ This will get what we need and organize it under `/etc/letsencrypt/live/example.
 
 And skip ahead to [Reformat For Lighttpd](#reformat)
 
-### The Hard Way<a name="hardway"></a>
+### (Option B) The Hard Way<a name="hardway"></a>
 
 #### Create The Web Root
 
-Create the Web root and make sure lighty has permissions to access these files.
+Create the Web root and make sure lighty has permissions to access these files.  We also need to use the setgid sticky bit here so when certbot runs, it creates the directory with permissions that lighty can read.  As of this writing, [there is no way to tell certbot to use certain permisssions](https://github.com/certbot/certbot/issues/1761).
 
-    mkdir -p /var/letsencrypt && chown -R lighttpd:lighttpd /var/letsencrypt
+    sudo -u lighttpd mkdir -p /var/certbot/public_html/.well-known/
+    chmod g+s /var/certbot/public_html/.well-known
 
 #### Configure Lighttpd
 
@@ -57,26 +60,20 @@ Now we need to configure lighty to serve these validation files on your new doma
 
 This will work for any future validation as well, but you may not want to leave it enabled after you are finished.  I'm assuming the ACME validation uses one time use tokens, but I haven't dug into the source to find out, so either do the research yourself or just disable it when we're done.  Now reload lighty to bring in the new conf.
 
-    systemctl reload lighttpd
+    systemctl restart lighttpd
 
 **OR** with lighttpd-angel
 
     kill -HUP `cat /var/run/lighttpd.pid`
 
-`certbot` should go through the motions and finish validation after this. **VERIFY ME**  It should generate your private key, CSR, and get the requested certificate and cert chain from Let's Encrypt. It should put all these files in `/etc/letsencrypt/live/example.com/`.
-
 #### Run Certbot
-
-So, we need to use the setgid sticky bit here so when certbot runs, it creates the directory with permissions that lighty can read.
-
-    :::bash
-    sudo -u lighttpd mkdir -p /var/certbot/public_html/.well-known/
-    chmod g+s /var/certbot/public_html/.well-known
 
 Now you can run certbot to generate and fetch your new cert.
 
     :::bash
     certbot certonly --webroot -w /var/certbot/public_html -d example.com -d www.example.com
+
+It should go through the motions automagically and symlink all of your new certs in the `/etc/letsencrypt/live/example.com/` directory.
 
 ## Reformat For Lighttpd<a name="reformat"></a>
 
@@ -98,7 +95,7 @@ Just to make sure, test and make sure the `lighttpd` user has read permissions.
 
     sudo -u lighttpd file -L /etc/letsencrypt/live/example.com/cert.pem
 
-## Configure Lighttpd
+## Configure Lighttpd For Your New Cert
 
 Configure lighty to use the new certificate and chain.  In this example, I've use the configuration suggested by [cipherli.st](https://cipherli.st), but you might want to do  your own legwork on that in case this is out of date, or you have different requirements.
 
@@ -122,7 +119,7 @@ You should be pretty much done here, but for a little added privacy for your use
 
 ## Force HTTPS<a name="force"></a>
 
-It's generally a good practice to use HTTPS always. There's no real downside to it anymore.
+It's generally a good practice to use HTTPS always. There's no real downside to it anymore. Unless you're not [automating renewal](#automate).
 
     $SERVER["socket"] == ":80" {
         url.redirect = (
@@ -130,7 +127,7 @@ It's generally a good practice to use HTTPS always. There's no real downside to 
         )
     }
 
-## Automate Renewal
+## Automate Renewal<a name="automate"></a>
 
 Assuming you left the lighty config for `.well-known`, you can just run the sane `certbot` command you used above as a daily cronjob.
 
