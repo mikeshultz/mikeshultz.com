@@ -9,6 +9,16 @@
 @darker: #AFAFAF;
 @dark: #000;
 
+/* Fonts */
+.font-heading {
+    font-family: 'PT Sans Caption', sans-serif;
+    font-weight: bold;
+}
+
+.font-body {
+    font-family: 'Didact Gothic', monospace;
+}
+
 /* Global Reset */
 * {
   margin: 0;
@@ -18,14 +28,15 @@
 html, body { height: 100%; }
 
 body {
+  .font-body;
   background-color: @light;
-  font: 13.34px Helvetica, Arial, sans-serif;
-  font-size: small;
+  font-size: 13.34px;
   text-align: center;
 }
 
-/*h1, h2, h3, h4, h5, h6 {
-  font-size: 100%; }*/
+h1, h2, h3, h4, h5, h6 {
+  .font-heading;
+}
   
 h1 { margin-bottom: 1em; }
 p { margin: 1em 0; }
@@ -198,6 +209,11 @@ ul.posts {
                     font-size: 75%;
                 }
             }
+        }
+    }
+    .entry-content {
+        img {
+            max-width: 100%;
         }
     }
 }
