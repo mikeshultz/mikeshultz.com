@@ -1,10 +1,17 @@
 Title: Setting Up Let's Encrypt With Lighttpd
 Date: 2015-12-04 10:20
+Modified: 2017-05-10 00:41
 Category: Security
 Tags: letsencrypt, linux, ssl, tls, lighttpd
 Slug: setting-up-lets-encrypt-with-lighttpd
 Authors: Mike Shultz
 Summary: So earlier today(yesterday, now) Let's Encrypt was released as a public beta and thought I'd test it out on this site. The certs that it generates currently have a short expiration(4 months at the time of this writing) but since I'd never pay to encrypt this site but still like having encryption always available, thought I'd give it a shot.
+
+## DEPRECIATED
+
+[See my other post on using certbot](/setting-up-lets-encrypt-with-lighttpd-and-certbot.html).  The information here is old and probably doesn't work anymore.
+
+## Intro
 
 So earlier today(yesterday, now) [Let's Encrypt was released as a public beta](https://letsencrypt.org/2015/12/03/entering-public-beta.html) and thought I'd test it out on this site. The certs that it generates currently have a short expiration(4 months at the time of this writing) but since I'd never pay to encrypt this site but still like having encryption always available, thought I'd give it a shot.
 
