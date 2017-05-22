@@ -16,7 +16,7 @@
 }
 
 .font-body {
-    font-family: 'Didact Gothic', monospace;
+    font-family: Muli, monospace;
 }
 
 /* Global Reset */
@@ -80,6 +80,15 @@ ul.posts {
     }
 }
 
+.hide-mobile {
+    display: inline-block;;
+}
+@media screen and (max-width: 425px) {
+    .hide-mobile {
+        display: none;
+    }
+}
+
 /*****************************************************************************/
 /*
 /* Site
@@ -88,70 +97,51 @@ ul.posts {
 
 .site {
     font-size: 115%;
-    text-align: justify;
+    text-align: left;
     margin: 0 auto 2em;
     line-height: 1.5em;
-}
-
-.site .header {
-    height: 115px;
-}
-
-.site .header .intro {
-    padding: 2em 2em 0;
-    margin-bottom: 0;
-    color: #FFF;
-    font-weight: bold;
-    display: block;
-    color: #FFF;
-    height: 125px;
-    float: left;
-    width: 30em;
-}
-
-.site .header ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.site .header {
-    background: #000;
-    margin: 0 0 75px;
-}
-
-/*.site .header .brand {
-    display: block;
-    color #FFF;
-    height: 125px
-    display: block;
-    float: left;
-}*/
-
-.site .header a {
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.site .header h1.title {
-    display: inline-block;
-    margin-bottom: 2em;
-}
-
-.site .header h1.title a {
-    color: #a00;
-}
-
-.site .header h1.title a:hover {
-    color: #000;
-}
-
-.site .header a.extra {
-    color: #aaa;
-    margin-left: 1em;
-}
-
-.site .header a.extra:hover {
-    color: #000;
+    .header {
+        background: #000;
+        margin: 0 0 75px;
+        height: 115px;
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 1em;
+        }
+        a {
+            font-weight: bold;
+            text-decoration: none;
+        }
+        a.extra {
+            color: #aaa;
+            margin-left: 1em;
+            &:hover {
+                color: #000;
+            }
+        }
+        h1.title {
+            display: inline-block;
+            margin-bottom: 2em;
+            a {
+                color: #a00;
+            }
+            a:hover {
+                color: #000;
+            }
+        }
+        .intro {
+            padding: 2em 2em 0;
+            margin-bottom: 0;
+            color: #FFF;
+            font-weight: bold;
+            display: block;
+            color: #FFF;
+            height: 125px;
+            float: left;
+            width: 30em;
+        }
+    }
 }
 
 .site .header .face {
@@ -179,10 +169,6 @@ ul.posts {
     }
 }
 
-.site .header ul {
-    margin: 1em;
-}
-
 .site .content {
     @media screen and (max-width: 425px) {
         margin: 1em;
@@ -199,9 +185,15 @@ ul.posts {
             text-decoration: none;
         }
     }
+    ol {
+        margin-left: 3em;
+    }
     ol#post-list {
         list-style-type: none;
+        margin-left: 0;
         article {
+            margin-bottom: 5em;
+            border-bottom: 1px #cfcfcf solid;
             header {}
             footer {
                 time {
