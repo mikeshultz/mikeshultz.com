@@ -18,7 +18,7 @@ PLUGIN_PATHS = ['pelican-plugins']
 PLUGINS = ['assets',]#'yuicompressor', ]
 
 ASSET_SOURCE_PATHS = ['static/css']
-ASSET_CONFIG = (('closure_compressor_optimization', 'WHITESPACE_ONLY'), ('less_bin', '/usr/bin/lessc'), )
+ASSET_CONFIG = (('closure_compressor_optimization', 'WHITESPACE_ONLY'), ('less_bin', '/home/mike/.nvm/versions/node/v8.2.1/bin/lessc'), )
 
 #STATIC_PATHS = ['static']
 THEME_STATIC_DIR = 'static'
