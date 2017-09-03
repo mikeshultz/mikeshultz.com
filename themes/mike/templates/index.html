@@ -1,21 +1,66 @@
 {% extends "base.html" %}
 {% block title %}Blog{% endblock %}
 {% block content %}
-<section id="content" class="content">
+<section id="content" class="content container-fluid">
+    <div class="row">
 
-    <ol id="post-list">
-    {% for article in articles_page.object_list %}
-            <li><article class="hentry">
-                    <header> <h2 class="entry-title"><a href="{{ SITEURL }}/{{ article.url }}" rel="bookmark" title="Permalink to {{ article.title|striptags }}">{{ article.title }}</a></h2> </header>
-                    <footer class="post-info">
-                        <time class="published" datetime="{{ article.date.isoformat() }}"> {{ article.locale_date }} </time>
-                    </footer><!-- /.post-info -->
-                    <div class="entry-content"> {{ article.summary }} </div><!-- /.entry-content -->
-            </article></li>
-    {% endfor %}
-    </ol><!-- /#posts-list -->
-{% if articles_page.has_other_pages() %}
-    {% include 'pagination.html' %}
-{% endif %}
+        <div class="col-md-8">
+
+            <ol id="post-list">
+            {% for article in articles_page.object_list %}
+                    <li><article class="hentry">
+                            <header> <h2 class="entry-title"><a href="{{ SITEURL }}/{{ article.url }}" rel="bookmark" title="Permalink to {{ article.title|striptags }}">{{ article.title }}</a></h2> </header>
+                            <footer class="post-info">
+                                <time class="published" datetime="{{ article.date.isoformat() }}"> {{ article.locale_date }} </time>
+                            </footer><!-- /.post-info -->
+                            <div class="entry-content"> {{ article.summary }} </div><!-- /.entry-content -->
+                    </article></li>
+            {% endfor %}
+            </ol><!-- /#posts-list -->
+        {% if articles_page.has_other_pages() %}
+            {% include 'pagination.html' %}
+        {% endif %}
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="panel panel-default">
+                <!-- Default panel contents -->
+                <div class="panel-heading">Projects</div>
+
+                <div class="panel-body">
+                    <p>These are my currently active projects.</p>
+                </div>
+
+                <!-- List group -->
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <h3><a href="https://www.ethsnap.com/">Ethsnap</a></h3>
+                        <p>A Web site that provides nightly snapshots of a go-ethereum <code>chaindata</code> directory.</p>
+                    </li>
+                    <li class="list-group-item">
+                        <h3><a href="https://www.etherep.com/">Etherep</a></h3>
+                        <p>Etherep is an ultra-simple dapp for providing a dependable, crowdsourced reputation to Ethereum. Users rate an address on a scale of -5 (worst) to 5(best). Then all scores are combined to give an overall rating of the address.</p>
+                    </li>
+                    <li class="list-group-item">
+                        <h3><a href="https://github.com/mikeshultz/icenine">Icenine</a></h3>
+                        <p>Graphical Ethereum cold storage wallet written in Python.  This project is still in alpha.</p>
+                    </li>
+                    <li class="list-group-item">
+                        <h3><a href="https://github.com/mikeshultz/ansible-geth">ansible-geth</a></h3>
+                        <p>Ansible playbooks for deploying go-ethereum.</p>
+                    </li>
+                    <li class="list-group-item">
+                        <h3><a href="http://ethmsg.com/">Ethmsg</a></h3>
+                        <p>A work in progress.</p>
+                    </li>
+                    <li class="list-group-item">
+                        <h3><a href="http://ethenti.city/">Ethenticity</a></h3>
+                        <p>A work in progress.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </section><!-- /#content -->
 {% endblock content %}
