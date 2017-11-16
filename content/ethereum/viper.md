@@ -73,58 +73,68 @@ It should spit out a long hex string(e.g. `0x600035601c52740100000000000...`) wh
 
 So now, let's use viper to generate our ABI: 
 
-    viper -f abi example.vy
+    viper -f json example.vy
 
 Here's a formatted example the ABI for `example.vy`:
 
     [
-        {
-            'name': '__init__(address)', 
-            'outputs': [], 
-            'inputs': [
-                {
-                    'type': 'address', 
-                    'name': '_owner'
-                }
-            ], 
-            'constant': False, 
-            'payable': False, 
-            'type': 'constructor'
-        }, 
-        {
-            'name': 'check_balance()', 
-            'outputs': [
-                {
-                    'type': 'int128', 
-                    'name': 'out'
-                }
-            ], 
-            'inputs': [], 
-            'constant': True, 
-            'payable': False, 
-            'type': 'function'
-        }, 
-        {
-            'name': 'distribute()', 
-            'outputs': [], 
-            'inputs': [], 
-            'constant': False, 
-            'payable': False, 
-            'type': 'function'
-        }, 
-        {
-            'name': 'deposit()', 
-            'outputs': [
-                {
-                    'type': 'bool', 
-                    'name': 'out'
-                }
-            ], 
-            'inputs': [], 
-            'constant': False, 
-            'payable': True, 
-            'type': 'function'
-        }
+       {
+          "name":"__init__",
+          "outputs":[
+
+          ],
+          "inputs":[
+             {
+                "type":"address",
+                "name":"destination_address"
+             }
+          ],
+          "constant":false,
+          "payable":false,
+          "type":"constructor"
+       },
+       {
+          "name":"check_balance",
+          "outputs":[
+             {
+                "type":"int128",
+                "name":"out"
+             }
+          ],
+          "inputs":[
+
+          ],
+          "constant":true,
+          "payable":false,
+          "type":"function"
+       },
+       {
+          "name":"distribute",
+          "outputs":[
+
+          ],
+          "inputs":[
+
+          ],
+          "constant":false,
+          "payable":false,
+          "type":"function"
+       },
+       {
+          "name":"deposit",
+          "outputs":[
+             {
+                "type":"bool",
+                "name":"out"
+             }
+          ],
+          "inputs":[
+
+          ],
+          "constant":false,
+          "payable":true,
+          "type":"function"
+       }
     ]
 
 The concept is pretty straight forward enough, with a couple of exceptions.  `constant` tells the EVM whether or not the function makes any alterations to the blockchain.  If you're sending ether, or altering data, or doing any kind of transaction, your function is **not constant**.  Anything that can be run locally on whatever node you make the RPC/IPC call on, is constant.  Data types used in the ABI are [Solidity types](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI#types) and **not Viper types**, so keep that in mind.  For instance, `num` and `decimal` are not a thing here and instead you may want to use `int`.  And __decimal/floats are not a thing outside of Viper and should be avoided for return values.__
@@ -151,11 +161,11 @@ Now that you have a geth console, we can deploy our contract directly from here.
 
 We will need the JSON ABI definition we created earlier.  It's best to remove newlines here or `geth` will wig out.
 
-    > var abi = [{'name': '__init__(address)', 'outputs': [], 'inputs': [{'type': 'address', 'name': '_owner'}], 'constant': False, 'payable': False, 'type': 'constructor'}, {'name': 'check_balance()', 'outputs': [{'type': 'int128', 'name': 'out'}], 'inputs': [], 'constant': True, 'payable': False, 'type': 'function'}, {'name': 'distribute()', 'outputs': [], 'inputs': [], 'constant': False, 'payable': False, 'type': 'function'}, {'name': 'deposit()', 'outputs': [{'type': 'bool', 'name': 'out'}], 'inputs': [], 'constant': False, 'payable': True, 'type': 'function'}]
+    > var abi = [{"name": "__init__", "outputs": [], "inputs": [{"type": "address", "name": "destination_address"}], "constant": false, "payable": false, "type": "constructor"}, {"name": "check_balance", "outputs": [{"type": "int128", "name": "out"}], "inputs": [], "constant": true, "payable": false, "type": "function"}, {"name": "distribute", "outputs": [], "inputs": [], "constant": false, "payable": false, "type": "function"}, {"name": "deposit", "outputs": [{"type": "bool", "name": "out"}], "inputs": [], "constant": false, "payable": true, "type": "function"}]
 
 We'll also need the bytecode hex string we compiled from Viper.
 
-    > var bytecode = "0x600035601c52740100000000000000000000000000000000000000006020526fffffffffffffffffffffffffffffffff6040527fffffffffffffffffffffffffffffffff000000000000000000000000000000016060527402540be3fffffffffffffffffffffffffdabf41c006080527ffffffffffffffffffffffffdabf41c00000000000000000000000002540be40060a0526020610223610140393415155857602061022360c03960c05160205181101558575061014051600055600160025561020b56600035601c52740100000000000000000000000000000000000000006020526fffffffffffffffffffffffffffffffff6040527fffffffffffffffffffffffffffffffff000000000000000000000000000000016060527402540be3fffffffffffffffffffffffffdabf41c006080527ffffffffffffffffffffffffdabf41c00000000000000000000000002540be40060a0526398ba1d4660005114156100b2573415155857303160005260206000f3005b63e4fc6b6d60005114156100e05734151558576000303113155857600060006000600030316000546000f150005b63d0e30db06000511415610144576000341315585733600160c05260c06020200154156101295733600160c05260c06020200134815401815550600160005260206000f3610142565b3433600160c05260c06020200155600160005260206000f35b005b5b6100c661020b036100c66000396100c661020b036000f3"
+    > var bytecode = "0x600035601c52740100000000000000000000000000000000000000006020526f7fffffffffffffffffffffffffffffff6040527fffffffffffffffffffffffffffffffff8000000000000000000000000000000060605274012a05f1fffffffffffffffffffffffffdabf41c006080527ffffffffffffffffffffffffed5fa0e000000000000000000000000000000000060a0526020610236610140393415155857602061023660c03960c05160205181101558575061014051600055600160025561021e56600035601c52740100000000000000000000000000000000000000006020526f7fffffffffffffffffffffffffffffff6040527fffffffffffffffffffffffffffffffff8000000000000000000000000000000060605274012a05f1fffffffffffffffffffffffffdabf41c006080527ffffffffffffffffffffffffed5fa0e000000000000000000000000000000000060a0526398ba1d4660005114156100b2573415155857303160005260206000f3005b63e4fc6b6d60005114156100e25734151558576000303113155857600060006000600030316000546000f1155857005b63d0e30db06000511415610157576000341315585733600160c052602060c02001541561013c5733600160c052602060c02001606051348254018060405190135857809190125857815550600160005260206000f3610155565b3433600160c052602060c0200155600160005260206000f35b005b5b6100c661021e036100c66000396100c661021e036000f3"
 
 Now we create a contract instance using the ABI.  We can deploy instances of our contract from this and it can be reused.
 
@@ -202,7 +212,7 @@ You will need this address later to make any calls or deposits to your contract,
 
 Now, let's mess around with our new fancy contract.  If you're on the same console, you won't have to redefine your ABI and contract, but for the sake of reference I'm going to do it here anyway.
 
-    var abi =[{'name': '__init__(address)', 'outputs': [], 'inputs': [{'type': 'address', 'name': '_owner'}], 'constant': False, 'payable': False, 'type': 'constructor'}, {'name': 'check_balance()', 'outputs': [{'type': 'int128', 'name': 'out'}], 'inputs': [], 'constant': True, 'payable': False, 'type': 'function'}, {'name': 'distribute()', 'outputs': [], 'inputs': [], 'constant': False, 'payable': False, 'type': 'function'}, {'name': 'deposit()', 'outputs': [{'type': 'bool', 'name': 'out'}], 'inputs': [], 'constant': False, 'payable': True, 'type': 'function'}]
+    var abi = [{"name": "__init__", "outputs": [], "inputs": [{"type": "address", "name": "destination_address"}], "constant": false, "payable": false, "type": "constructor"}, {"name": "check_balance", "outputs": [{"type": "int128", "name": "out"}], "inputs": [], "constant": true, "payable": false, "type": "function"}, {"name": "distribute", "outputs": [], "inputs": [], "constant": false, "payable": false, "type": "function"}, {"name": "deposit", "outputs": [{"type": "bool", "name": "out"}], "inputs": [], "constant": false, "payable": true, "type": "function"}]
     contract_address = "0xdeadbeefe28a3e8358ba34aef0c03ef0e2b26ea6"
     deployed_contract = eth.contract(abi).at("0xdeadbeefe28a3e8358ba34aef0c03ef0e2b26ea6")
 
