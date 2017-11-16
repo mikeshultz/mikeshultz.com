@@ -61,10 +61,8 @@ Let's start out with a simple contract that will accept deposits and distribute 
 
         if self.depositors[msg.sender]:
             self.depositors[msg.sender] += msg.value
-            return True
         else:
             self.depositors[msg.sender] = msg.value
-            return True
 
 This is incredibly simple and there's a lot more you can do with Viper but that's a bit out of scope here.
 
