@@ -7,7 +7,7 @@ Slug: deploying-ethereum-viper-smart-contract
 Authors: Mike Shultz
 Summary: Viper is missing a lot of documentation.  It took a lot of trial and error to finally figure out how to deploy a contract to an Ethereum blockchain.  Here's how I created a smart contract in Viper and deployed it via Geth(go-ethereum).
 
-Viper is missing a lot of documentation.  It took a lot of trial and error to finally figure out how to deploy a contract to an Ethereum blockchain.  This information may not be very useful for people who have deployed compiled smart contracts before.  This is more geared towards people who are using Viper as their first language to create Ethereum smart contracts but are familiar with common Python development practices, and their local system.
+Viper is missing a lot of documentation(though it has gotten better).  It took a lot of trial and error to finally figure out how to deploy a contract to an Ethereum blockchain.  This information may not be very useful for people who have deployed compiled smart contracts before.  This is more geared towards people who are using Viper as their first language to create Ethereum smart contracts but are familiar with common Python development practices, and their local system.
 
 I'd recommend using [this docker container](https://github.com/mikeshultz/ethereum-geth-dev).  I updated it slightly from the original and doesn't match what's in Docker Hub.  Alternatively, [testrpc](https://github.com/ethereumjs/testrpc) is easier to setup, but has on occasion had me chasing bugs for too long(YMMV).  Either way, it's a lot better to test things out before real money is at stake on the main net.  Alternatively, you could setup a full node on a test network, but the test networks are not always completely functional, so probably not the best choice for quick dev.
 
@@ -19,7 +19,7 @@ First and foremost, [read the documentation they have](https://viper.readthedocs
 
 Viper does **not** use all the same types as Python.  There's special types for Ethereum-useful data like `address` and `wei-value` which you'll likely use a lot.  The one that will likely trip you up the most is that `float` and `int` are not really a thing in Viper.  Instead, Viper uses `num` and `decimal`.  They can almost be thought of the same, except that they do have fixed lengths.  See the [Types section of the documentation](https://viper.readthedocs.io/en/latest/types.html) for more detailed information.
 
-~~The grammar has some unexpected gotchas as well. When in doubt see the [Grammar section of the README](https://github.com/ethereum/viper#grammar).  It can be a little annoying to parse at first, but you'll get the hang of it.~~ [This grammar does not appear to be available anymore at the time of this update.]  
+<s>The grammar has some unexpected gotchas as well. When in doubt see the [Grammar section of the README](https://github.com/ethereum/viper#grammar).  It can be a little annoying to parse at first, but you'll get the hang of it.</s> [This grammar does not appear to be available anymore at the time of this update.]  
 
 Declaration of globally assigned variables is also a departure from Python but is something you'll need to be familiar with.  There's not a whole lot of information to go on except [the code examples in their repository](https://github.com/ethereum/viper/tree/master/examples). They are declared in the "header" of the file, and any globals that you might want defined at the time of deploy should be set in the constructor of the contract. These are referenced through `self` and unlike python, `self` does not need to be an argument in the functions.  For instance, say you were creating a contact that needed to reach a goal before distributing funds, you could define the goal value at the top of the Viper contract like this: 
 
@@ -38,12 +38,12 @@ That should get you setup with a base install of Viper and the command `viper` s
 
 Let's start out with a simple contract that will accept deposits and distribute the balance to a specified address when triggered.  Nothing really sexy about it, but it should show a basic set of features to get you started.  We're going to create the file `example.vy`:
 
-    desto: address
+    owner: address
     depositors: wei_value[address]
     depositorsNext: num
 
-    def __init__(destination_address: address):
-        self.desto = destination_address
+    def __init__(_owner: address):
+        self.owner = _owner
         self.depositorsNext = 1
 
     def check_balance() -> wei_value:
@@ -51,7 +51,7 @@ Let's start out with a simple contract that will accept deposits and distribute 
 
     def distribute():
         assert self.balance > 0
-        send(self.desto, self.balance)
+        send(self.owner, self.balance)
 
     @payable
     def deposit() -> bool:
@@ -76,9 +76,9 @@ Now we're going to compile it to the bytecode that will actually be deployed to 
 
 It should spit out a long hex string(e.g. `0x600035601c52740100000000000...`) which is the compiled bytecode of our contract.  Save this for later, we'll need it.
 
-## Create Your ABI
+## Generate Your ABI
 
-[An ABI, for those unfamiliar](https://en.wikipedia.org/wiki/Application_binary_interface) is basically a human and machine readable reference that tells the EVM what functions and variables are defined in the contract.  Weno longer have to write our own ABIs!  But it's still a pretty good idea to read up on [Ethereum smart contract ABIs in JSON](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI#json) because it can be pretty useful to know what these mean for future troubleshooting. 
+[An ABI, for those unfamiliar](https://en.wikipedia.org/wiki/Application_binary_interface) is basically a human and machine readable reference that tells the Ethereum client what functions and variables are defined in the contract(and to reference their location in the EVM).  We no longer have to write our own ABIs!  But it's still a pretty good idea to read up on [Ethereum smart contract ABIs in JSON](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI#json) because it can be pretty useful to know what these mean for future troubleshooting. 
 
 So now, let's use viper to generate our ABI: 
 
@@ -93,7 +93,7 @@ Here's a formatted example the ABI for `example.vy`:
             'inputs': [
                 {
                     'type': 'address', 
-                    'name': 'destination_address'
+                    'name': '_owner'
                 }
             ], 
             'constant': False, 
@@ -136,7 +136,7 @@ Here's a formatted example the ABI for `example.vy`:
         }
     ]
 
-The concept is pretty straight forward enough, with a couple of exceptions.  `constant` tells the EVM whether or not the function makes any alterations to the blockchain.  If you're sending ether, or altering data, or doing any kind of transaction, your function is **not constant**.  Anything that can be run locally on whatever node you make the RPC/IPC call on, is constant.  Data types used in the ABI are [EVM/Solidity types](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI#types) and **not Viper types**, so keep that in mind.  For instance, `num` and `decimal` are not a thing here and instead you may want to use `int`.  And __decimal/floats are not a thing outside of Viper and should be avoided for return values.__
+The concept is pretty straight forward enough, with a couple of exceptions.  `constant` tells the EVM whether or not the function makes any alterations to the blockchain.  If you're sending ether, or altering data, or doing any kind of transaction, your function is **not constant**.  Anything that can be run locally on whatever node you make the RPC/IPC call on, is constant.  Data types used in the ABI are [Solidity types](https://github.com/ethereum/wiki/wiki/Ethereum-Contract-ABI#types) and **not Viper types**, so keep that in mind.  For instance, `num` and `decimal` are not a thing here and instead you may want to use `int`.  And __decimal/floats are not a thing outside of Viper and should be avoided for return values.__
 
 ## Deploy Your Contract Using Geth
 
@@ -156,11 +156,11 @@ Realistically if you're running a private chain on your local machine, it might 
 
 Now that you have a geth console, we can deploy our contract directly from here.  First we're going to define the recipient address of the ether.  This is the address that `distribute` will send the contract's funds to when called.
 
-    > var dest = "0x9283099A29556fCFdeadbeef292D4F67CB7A7A8b"
+    > var owner = eth.accounts[0]
 
 We will need the JSON ABI definition we created earlier.  It's best to remove newlines here or `geth` will wig out.
 
-    > var abi = [{'name': '__init__(address)', 'outputs': [], 'inputs': [{'type': 'address', 'name': 'destination_address'}], 'constant': False, 'payable': False, 'type': 'constructor'}, {'name': 'check_balance()', 'outputs': [{'type': 'int128', 'name': 'out'}], 'inputs': [], 'constant': True, 'payable': False, 'type': 'function'}, {'name': 'distribute()', 'outputs': [], 'inputs': [], 'constant': False, 'payable': False, 'type': 'function'}, {'name': 'deposit()', 'outputs': [{'type': 'bool', 'name': 'out'}], 'inputs': [], 'constant': False, 'payable': True, 'type': 'function'}]
+    > var abi = [{'name': '__init__(address)', 'outputs': [], 'inputs': [{'type': 'address', 'name': '_owner'}], 'constant': False, 'payable': False, 'type': 'constructor'}, {'name': 'check_balance()', 'outputs': [{'type': 'int128', 'name': 'out'}], 'inputs': [], 'constant': True, 'payable': False, 'type': 'function'}, {'name': 'distribute()', 'outputs': [], 'inputs': [], 'constant': False, 'payable': False, 'type': 'function'}, {'name': 'deposit()', 'outputs': [{'type': 'bool', 'name': 'out'}], 'inputs': [], 'constant': False, 'payable': True, 'type': 'function'}]
 
 We'll also need the bytecode hex string we compiled from Viper.
 
@@ -170,15 +170,15 @@ Now we create a contract instance using the ABI.  We can deploy instances of our
 
     > my_awesome_contract = eth.contract(abi)
 
-Unlock your account so you can actually make transactions from it.  This isn't logged in history or anything, just make sure there aren't prying eyes on your screen.
+Unlock your account so you can actually make transactions from it.
 
     > personal.unlockAccount(eth.accounts[0])
 
-And using this contract factory, we can deploy the contract.  The arguments here match the constructor `__init__` from your `example.vy` file except for the last argument which is an object.
+And using this contract factory, we can deploy the contract.  The arguments here match the constructor `__init__` from your `example.vy` file except for the last argument which is [a transaction object](https://github.com/ethereum/wiki/wiki/JavaScript-API#web3ethgettransaction).
 
-    > var deployed_contract = my_awesome_contract.new(dest, {from: eth.accounts[0], data: bytecode, gas: 4000000})
+    > var deployed_contract = my_awesome_contract.new(owner, {from: eth.accounts[0], data: bytecode, gas: 4000000})
 
-The final argument(the JavaScript object) defines some important values for this contract instance.  `data` of course contains the compiled `bytecode` we got from the output of `viper`.  `from` is required as it's the account originating the contract.  It will be responsible for paying any fees for deploying the contract, and it will control it in the future.  Usually this would be your `geth` primary account(`eth.accounts[0]`), but it could be any account you have unlocked on this `geth` instance.
+The final argument(the JavaScript object) defines some important values for this contract instance.  `data` of course contains the compiled `bytecode` we got from the output of `viper`.  `from` is required as it's the account creating the contract.  It will be responsible for paying any fees for deploying the contract.  Usually this would be your `geth` primary account(`eth.accounts[0]`), but it could be any account you have unlocked on this `geth` instance.
 
 And finally, [`gas`](https://ethereum.gitbooks.io/frontier-guide/content/costs.html), which should be the expected amount of gas used by your contract.  The viper compiler does not do gas estimation, so you may to have to do a bit of trial and error to get the right gas limit.  Or just set it high if you don't mind paying for errors.  The number above is just an approximate amount of wei that has seemed to work in testing.
 
@@ -211,7 +211,7 @@ You will need this address later to make any calls or deposits to your contract,
 
 Now, let's mess around with our new fancy contract.  If you're on the same console, you won't have to redefine your ABI and contract, but for the sake of reference I'm going to do it here anyway.
 
-    var abi =[{'name': '__init__(address)', 'outputs': [], 'inputs': [{'type': 'address', 'name': 'destination_address'}], 'constant': False, 'payable': False, 'type': 'constructor'}, {'name': 'check_balance()', 'outputs': [{'type': 'int128', 'name': 'out'}], 'inputs': [], 'constant': True, 'payable': False, 'type': 'function'}, {'name': 'distribute()', 'outputs': [], 'inputs': [], 'constant': False, 'payable': False, 'type': 'function'}, {'name': 'deposit()', 'outputs': [{'type': 'bool', 'name': 'out'}], 'inputs': [], 'constant': False, 'payable': True, 'type': 'function'}]
+    var abi =[{'name': '__init__(address)', 'outputs': [], 'inputs': [{'type': 'address', 'name': '_owner'}], 'constant': False, 'payable': False, 'type': 'constructor'}, {'name': 'check_balance()', 'outputs': [{'type': 'int128', 'name': 'out'}], 'inputs': [], 'constant': True, 'payable': False, 'type': 'function'}, {'name': 'distribute()', 'outputs': [], 'inputs': [], 'constant': False, 'payable': False, 'type': 'function'}, {'name': 'deposit()', 'outputs': [{'type': 'bool', 'name': 'out'}], 'inputs': [], 'constant': False, 'payable': True, 'type': 'function'}]
     contract_address = "0xdeadbeefe28a3e8358ba34aef0c03ef0e2b26ea6"
     deployed_contract = eth.contract(abi).at("0xdeadbeefe28a3e8358ba34aef0c03ef0e2b26ea6")
 
@@ -234,7 +234,7 @@ Again, after confirmation and inclusion in a block, the contract should have a b
     > deployed_contract.check_balance()
     500000000000000000
 
-Now at any time you can `distribute` this ether to the destination address you defined when deploying the contract.
+Now at any time you(or anyone else) can `distribute` this ether to the owner address you defined when deploying the contract.
 
     > deployed_contract.distribute({from:eth.accounts[0]})
 
