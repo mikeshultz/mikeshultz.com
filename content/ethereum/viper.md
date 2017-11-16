@@ -39,12 +39,9 @@ That should get you setup with a base install of Viper and the command `viper` s
 Let's start out with a simple contract that will accept deposits and distribute the balance to a specified address when triggered.  Nothing really sexy about it, but it should show a basic set of features to get you started.  We're going to create the file `example.vy`:
 
     owner: address
-    depositors: wei_value[address]
-    depositorsNext: num
 
     def __init__(_owner: address):
         self.owner = _owner
-        self.depositorsNext = 1
 
     def check_balance() -> wei_value:
         return self.balance
@@ -55,14 +52,10 @@ Let's start out with a simple contract that will accept deposits and distribute 
 
     @payable
     def deposit() -> bool:
-        # Deposit value in the contract and record the sender and value 
-        
+        # Deposit value in the contract and record the sender and value.
+        # Direct transfers can also be made to the contract, but wanted to leave
+        # this here because likely, your contract has more logic for deposits
         assert(msg.value > 0)
-
-        if self.depositors[msg.sender]:
-            self.depositors[msg.sender] += msg.value
-        else:
-            self.depositors[msg.sender] = msg.value
 
 This is incredibly simple and there's a lot more you can do with Viper but that's a bit out of scope here.
 
