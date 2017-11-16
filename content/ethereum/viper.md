@@ -143,7 +143,7 @@ The concept is pretty straight forward enough, with a couple of exceptions.  `co
 
 So I'm assuming you have a running `geth` instance already(ideally on a private chain).  If not [go get this docker container](https://github.com/mikeshultz/ethereum-geth-dev) or setup [testrpc](https://github.com/ethereumjs/testrpc).  I'll wait.
 
-![Still waiting](http://i.imgur.com/hniy4My.jpg)
+![Still waiting](https://i.imgur.com/hniy4My.jpg)
 
 Okay, good.  Now attach to your running geth instance from another terminal.  You can technically run your main instance as a console, but you'll have block notices cluttering up your interface.
 
