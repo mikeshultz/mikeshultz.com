@@ -6,8 +6,12 @@ Pelican source for mikeshultz.com
 
 Make sure lessc is installed.
 
-    sudo npm install -g less
+    npm install -g less
 
 And python dependencies.
 
     pip install -r requirements.txt
+
+And make sure the git submodule for pelican-plugins is cloned and up to date.
+
+    git submodule update --init pelican-plugins/
