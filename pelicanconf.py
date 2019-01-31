@@ -18,7 +18,10 @@ PLUGIN_PATHS = ['pelican-plugins']
 PLUGINS = ['assets',]#'yuicompressor', ]
 
 ASSET_SOURCE_PATHS = ['static/css']
-ASSET_CONFIG = (('closure_compressor_optimization', 'WHITESPACE_ONLY'), ('less_bin', '/home/mike/.nvm/versions/node/v8.2.1/bin/lessc'), )
+ASSET_CONFIG = (
+    ('closure_compressor_optimization', 'WHITESPACE_ONLY'),
+    ('less_bin', 'lessc'),
+)
 
 #STATIC_PATHS = ['static']
 THEME_STATIC_DIR = 'static'
@@ -37,8 +40,8 @@ LINKS = (('Pelican', 'http://getpelican.com/'),
          ('You can modify those links in your config file', '#'),)
 
 # Social widget
-SOCIAL = (('You can add links in your config file', '#'),
-          ('Another social link', '#'),)
+# SOCIAL = (('You can add links in your config file', '#'),
+#           ('Another social link', '#'),)
 
 DEFAULT_PAGINATION = 5
 
